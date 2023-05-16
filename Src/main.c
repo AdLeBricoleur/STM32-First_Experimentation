@@ -112,8 +112,8 @@ int main(void)
   {
 	  //Timer_Test(&timer_val);
 	  //code_0();
-	  code_1(1000);
-	  //code_2();
+	  //code_1(1000);
+	  code_2();
 	  //code_3(&mode,5000);
 	  //code_4(&mode,1000,500);
 	  //code_5(&mode,&toggle_flag);
