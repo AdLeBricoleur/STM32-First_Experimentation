@@ -9,3 +9,5 @@ void code_2(void);
 void code_3(int *mode,uint32_t Delay_ms);
 void code_4(int *mode,uint32_t Delay_ms_button,uint32_t Delay_ms_toggle);
 void code_5(int *mode,int *toggle_flag);
+void Timer_init(uint16_t *timer_val,TIM_HandleTypeDef *htim16);
+void Timer_Test(uint16_t *timer_val,TIM_HandleTypeDef *htim16);

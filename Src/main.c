@@ -54,10 +54,8 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
-void Timer_init(uint16_t *timer_val);
-void Timer_Test(uint16_t *timer_val);
-int mode = 0;
-int toggle_flag =0;
+//int mode = 0;
+//int toggle_flag =0;
 
 /* USER CODE END PFP */
 
@@ -73,7 +71,7 @@ int toggle_flag =0;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  //uint16_t timer_val;
+  uint16_t timer_val;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -99,10 +97,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Start timer without interrupt
-  //Timer_init(&timer_val);
+  Timer_init(&timer_val,&htim16);
 
   // Start timer with interrupt
-  HAL_TIM_Base_Start_IT(&htim16);
+  //HAL_TIM_Base_Start_IT(&htim16);
 
   /* USER CODE END 2 */
 
@@ -110,13 +108,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //Timer_Test(&timer_val);
 	  //code_0();
 	  //code_1(1000);
 	  //code_2();
 	  //code_3(&mode,1000);
 	  //code_4(&mode,1000,500);
-	  code_5(&mode,&toggle_flag);
+	  //code_5(&mode,&toggle_flag);
+	  Timer_Test(&timer_val,&htim16);
 
     /* USER CODE END WHILE */
 
@@ -190,9 +188,9 @@ static void MX_TIM16_Init(void)
 
   /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 4000-1;
+  htim16.Init.Prescaler = 8000-1;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 10000-10;
+  htim16.Init.Period = 65535-1;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -285,45 +283,26 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 // Callback: timer has rolled over
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  // Check which version of the timer triggered this callback and toggle LED
-  if (htim == &htim16)
-  {
-	  toggle_flag = 1;
-  }
-}
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-	if(GPIO_Pin == GPIO_PIN_13)
-	{
-		mode++;
-	}
-	if(mode>2)
-	{
-		mode = 0;
-	}
-}
-
-void Timer_init(uint16_t *timer_val)
-{
-	// Start timer
-	HAL_TIM_Base_Start(&htim16);
-
-	// Get current time (microseconds)
-	*timer_val = __HAL_TIM_GET_COUNTER(&htim16);
-}
-
-void Timer_Test(uint16_t *timer_val)
-{
-	// If enough time has passed (1 second), toggle LED and get new timestamp
-	if (__HAL_TIM_GET_COUNTER(&htim16) - *timer_val >= 10000)
-	{
-	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // LED2_TOGGLE();
-	  *timer_val = __HAL_TIM_GET_COUNTER(&htim16);
-	}
-}
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+//{
+//  // Check which version of the timer triggered this callback and toggle LED
+//  if (htim == &htim16)
+//  {
+//	  toggle_flag = 1;
+//  }
+//}
+//
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+//{
+//	if(GPIO_Pin == GPIO_PIN_13)
+//	{
+//		mode++;
+//	}
+//	if(mode>2)
+//	{
+//		mode = 0;
+//	}
+//}
 
 /* USER CODE END 4 */
 
