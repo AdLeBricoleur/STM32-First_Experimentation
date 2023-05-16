@@ -15,22 +15,20 @@ void LED2_TOGGLE(void)
 	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 }
 
+// It's a simple toggle on LED2
 void code_0(void)
 {
-	// option 1
 	LED2_TOGGLE();
-
-	//option 2
-	//LED2_OFF();
-	//LED2_ON();
 }
 
-void code_1(void)
+// It's a toggle every 1 second on LED2
+void code_1(uint32_t Delay_ms)
 {
 	LED2_TOGGLE();
-	HAL_Delay(1000);
+	HAL_Delay(Delay_ms);
 }
 
+// When button B1 is pressed, LED2 lights up
 void code_2(void)
 {
 	int stateOfPushButton = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
@@ -45,58 +43,60 @@ void code_2(void)
 	}
 }
 
-int code_3(int param_code_3)
+// It is a machine with 3 states which is linked automatically every 5 seconds
+// LED2 Off then LED2 On and LED2 Toggle
+void code_3(int *mode,uint32_t Delay_ms)
 {
-	switch (param_code_3)
+	switch (*mode)
 	{
 		case 0:
 			LED2_OFF();
-			HAL_Delay(5000);
+			HAL_Delay(Delay_ms);
 			break;
 		case 1:
 			LED2_ON();
-			HAL_Delay(5000);
+			HAL_Delay(Delay_ms);
 			break;
 		case 2:
 			for(int i=0;i<10;i++)
 			{
 				LED2_TOGGLE();
-				HAL_Delay(500);
+				HAL_Delay(Delay_ms/10);
 			}
 			break;
 		default:
 			break;
 	}
 
-	if(param_code_3>=2)
+	if(*mode>=2)
 	{
-		param_code_3 = 0;
+		*mode = 0;
 	}
 	else
 	{
-		param_code_3++;
+		*mode++;
 	}
-
-	return param_code_3;
 }
 
-int code_4(int param_code_4)
+// It's a 3-state machine that happens each time you press the B1 button (we don't use interrupts)
+// LED2 Off then LED2 On and LED2 Toggle
+void code_4(int *mode,uint32_t Delay_ms_button,uint32_t Delay_ms_toggle)
 {
 	int stateOfPushButton = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
 
 	if ( stateOfPushButton != 1 )
 	{
-		param_code_4++;
+		*mode++;
 
-		if(param_code_4>2)
+		if(*mode>2)
 		{
-			param_code_4 = 0;
+			*mode = 0;
 		}
 
-		HAL_Delay(1000);
+		HAL_Delay(Delay_ms_button);
 	}
 
-	switch (param_code_4)
+	switch (*mode)
 	{
 		case 0:
 			LED2_OFF();
@@ -105,15 +105,34 @@ int code_4(int param_code_4)
 			LED2_ON();
 			break;
 		case 2:
-			for(int i=0;i<10;i++)
-			{
-				LED2_TOGGLE();
-				HAL_Delay(500);
-			}
+			LED2_TOGGLE();
+			HAL_Delay(Delay_ms_toggle);
 			break;
 		default:
 			break;
 	}
+}
 
-	return param_code_4;
+// It's a 3-state machine that happens each time you press the B1 button (we use interrupts)
+// LED2 Off then LED2 On and LED2 Toggle
+void code_5(int *mode,int *toggle_flag)
+{
+	switch (*mode)
+	{
+		case 0: // Mode : LED OFF
+			LED2_OFF();
+			break;
+		case 1: // Mode : LED ON
+			LED2_ON();
+			break;
+		case 2: // Mode : LED TOGGLE
+			if (*toggle_flag == 1)
+			{
+				LED2_TOGGLE();
+				*toggle_flag = 0;
+			}
+			break;
+		default: // Default Mode
+			break;
+	}
 }
