@@ -43,7 +43,7 @@ void code_2(void)
 	}
 }
 
-// It is a machine with 3 states which is linked automatically every 5 seconds
+// It is a machine with 3 states which is linked automatically every 1 seconds
 // LED2 Off then LED2 On and LED2 Toggle
 void code_3(int *mode,uint32_t Delay_ms)
 {

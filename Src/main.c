@@ -71,7 +71,7 @@ void Timer_Test(uint16_t *timer_val);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  //int mode = 0;
+  int mode = 0;
   //int toggle_flag =0;
   //uint16_t timer_val;
   /* USER CODE END 1 */
@@ -113,8 +113,8 @@ int main(void)
 	  //Timer_Test(&timer_val);
 	  //code_0();
 	  //code_1(1000);
-	  code_2();
-	  //code_3(&mode,5000);
+	  //code_2();
+	  code_3(&mode,1000);
 	  //code_4(&mode,1000,500);
 	  //code_5(&mode,&toggle_flag);
 
