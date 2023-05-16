@@ -68,13 +68,13 @@ void code_3(int *mode,uint32_t Delay_ms)
 			break;
 	}
 
-	if(*mode>=2)
+	if((*mode)>=2)
 	{
 		*mode = 0;
 	}
 	else
 	{
-		*mode++;
+		(*mode)++;
 	}
 }
 
@@ -86,7 +86,7 @@ void code_4(int *mode,uint32_t Delay_ms_button,uint32_t Delay_ms_toggle)
 
 	if ( stateOfPushButton != 1 )
 	{
-		*mode++;
+		(*mode)++;
 
 		if(*mode>2)
 		{
