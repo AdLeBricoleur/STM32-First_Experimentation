@@ -1,0 +1,3 @@
+# Fichier a ignorer
+Src/syscalls.c
+Src/sysmem.c
