@@ -71,7 +71,7 @@ static void MX_TIM16_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint16_t timer_val;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -97,7 +97,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Start timer without interrupt
-  Timer_init(&timer_val,&htim16);
+  Timer16_start(&htim16);
 
   // Start timer with interrupt
   //HAL_TIM_Base_Start_IT(&htim16);
@@ -114,7 +114,7 @@ int main(void)
 	  //code_3(&mode,1000);
 	  //code_4(&mode,1000,500);
 	  //code_5(&mode,&toggle_flag);
-	  Timer_Test(&timer_val,&htim16);
+	  Timer16_routine(&htim16);
 
     /* USER CODE END WHILE */
 
