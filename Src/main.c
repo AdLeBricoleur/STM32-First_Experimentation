@@ -54,10 +54,11 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
-//int mode = 0;
-//int toggle_flag =0;
 
 /* USER CODE END PFP */
+
+//int mode = 0;
+//int toggle_flag =0;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
@@ -94,7 +95,10 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM16_Init();
+
   /* USER CODE BEGIN 2 */
+
+  /* USER CODE END 2 */
 
   // Start timer without interrupt
   Timer16_start(&htim16);
@@ -102,12 +106,12 @@ int main(void)
   // Start timer with interrupt
   //HAL_TIM_Base_Start_IT(&htim16);
 
-  /* USER CODE END 2 */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* USER CODE END WHILE */
+
 	  //code_0();
 	  //code_1(1000);
 	  //code_2();
@@ -115,8 +119,6 @@ int main(void)
 	  //code_4(&mode,1000,500);
 	  //code_5(&mode,&toggle_flag);
 	  Timer16_routine(&htim16);
-
-    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -282,6 +284,8 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+/* USER CODE END 4 */
+
 // Callback: timer has rolled over
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //{
@@ -303,8 +307,6 @@ static void MX_GPIO_Init(void)
 //		mode = 0;
 //	}
 //}
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
