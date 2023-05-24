@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ADC_BUF_LEN 4096
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -41,6 +41,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 TIM_HandleTypeDef htim16;
 
@@ -50,6 +51,7 @@ DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE BEGIN PV */
 //int mode = 0;
 //int toggle_flag =0;
+uint16_t adc_buf[ADC_BUF_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -77,10 +79,10 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	//uint16_t raw;
 	//char msg[10];
-	char msg_l[]= 	"Ce message est un long message pour le test du DMA1.\r\n" \
+	/*char msg_l[]= 	"Ce message est un long message pour le test du DMA1.\r\n" \
 					"Nous utilisons le DMA1 sur le périphérique USART2 TX.\r\n" \
 					"L'objectif est de faire un code simple qui explicite\r\n" \
-					"le fonctionement du DMA1 pour un novice comme moi.\r\n";
+					"le fonctionement du DMA1 pour un novice comme moi.\r\n";*/
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -112,8 +114,10 @@ int main(void)
   // Start timer with interrupt
   //HAL_TIM_Base_Start_IT(&htim16);
 
-  HAL_DMA_RegisterCallback(&hdma_usart2_tx, HAL_DMA_XFER_CPLT_CB_ID, &DMATransferComplete);
-  LED2_OFF();
+  //HAL_DMA_RegisterCallback(&hdma_usart2_tx, HAL_DMA_XFER_CPLT_CB_ID, &DMATransferComplete);
+  //LED2_OFF();
+
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -150,13 +154,13 @@ int main(void)
 //
 //	  // pretend we have something else to do for a while
 //	  HAL_Delay(1);
-	  /* fin code test ADC1 */
-
-	  /*début code test DMA1 */
-	  huart2.Instance->CR3 |= USART_CR3_DMAT;
-	  HAL_DMA_Start_IT(&hdma_usart2_tx, (uint32_t)msg_l,(uint32_t)&huart2.Instance->TDR, strlen(msg_l));
-	  HAL_Delay(1000);
-	  /* fin code test DMA1 */
+//	  /* fin code test ADC1 */
+//
+//	  /*début code test DMA1 */
+//	  huart2.Instance->CR3 |= USART_CR3_DMAT;
+//	  HAL_DMA_Start_IT(&hdma_usart2_tx, (uint32_t)msg_l,(uint32_t)&huart2.Instance->TDR, strlen(msg_l));
+//	  HAL_Delay(1000);
+//	  /* fin code test DMA1 */
 
     /* USER CODE END WHILE */
 
@@ -242,12 +246,12 @@ static void MX_ADC1_Init(void)
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.NbrOfConversion = 1;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc1.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -358,6 +362,9 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
   /* DMA1_Channel7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
@@ -427,19 +434,31 @@ static void MX_GPIO_Init(void)
 //		mode = 0;
 //	}
 //}
-void DMATransferComplete(DMA_HandleTypeDef *hdma)
+//void DMATransferComplete(DMA_HandleTypeDef *hdma)
+//{
+//	// LED2 on
+//	//LED2_ON();
+//
+//	// disable UART DMA mode
+//	huart2.Instance->CR3 &=~ USART_CR3_DMAT;
+//
+//	// LD2 off
+//	//LED2_OFF();
+//
+//	// LD2 toggle
+//	LED2_TOGGLE();
+//}
+
+// Called when first half of buffer is filled
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	// LED2 on
-	//LED2_ON();
+	LED2_ON();
+}
 
-	// disable UART DMA mode
-	huart2.Instance->CR3 &=~ USART_CR3_DMAT;
-
-	// LD2 off
-	//LED2_OFF();
-
-	// LD2 toggle
-	LED2_TOGGLE();
+// Called when buffer is completely filled
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	LED2_OFF();
 }
 /* USER CODE END 4 */
 
