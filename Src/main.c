@@ -121,7 +121,7 @@ int main(void)
 	  /* fin code test Adrien */
 
 	  // Test: Set GPIO pin high
-	  LED2_ON();
+	  Debug_ADC1_ON();
 
 	  // Get ADV value
 	  HAL_ADC_Start(&hadc1);
@@ -129,7 +129,7 @@ int main(void)
 	  raw = HAL_ADC_GetValue(&hadc1);
 
 	  // Test: Set GPIO pin low
-	  LED2_OFF();
+	  Debug_ADC1_OFF();
 
 	  // Convert to string and print
 	  sprintf(msg, "%hu\r\n", raw); // retour chariot (\r) plus saut de ligne (\n)
@@ -138,7 +138,7 @@ int main(void)
 	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
 	  // pretend we have something else to do for a while
-	  HAL_Delay(1000);
+	  HAL_Delay(1);
 
     /* USER CODE END WHILE */
 
@@ -348,7 +348,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LD2_Pin|Debug_ADC1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -356,12 +356,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pins : LD2_Pin Debug_ADC1_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin|Debug_ADC1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

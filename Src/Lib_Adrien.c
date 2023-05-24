@@ -181,3 +181,21 @@ void Timer16_routine(TIM_HandleTypeDef *htim16)
 	  __HAL_TIM_SET_COUNTER(htim16,0);
 	}
 }
+
+// Turn on the Nucleo Debug_ADC1
+void Debug_ADC1_ON(void)
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+}
+
+// Turn off the Nucleo Debug_ADC1
+void Debug_ADC1_OFF(void)
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+}
+
+// Toggle the Nucleo Debug_ADC1
+void Debug_ADC1_TOGGLE(void)
+{
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+}
