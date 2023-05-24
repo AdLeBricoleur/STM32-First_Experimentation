@@ -45,6 +45,7 @@ ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim16;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
 //int mode = 0;
@@ -54,11 +55,12 @@ UART_HandleTypeDef huart2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-
+void DMATransferComplete(DMA_HandleTypeDef *hdma);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -73,8 +75,12 @@ static void MX_ADC1_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint16_t raw;
-	char msg[10];
+	//uint16_t raw;
+	//char msg[10];
+	char msg_l[]= 	"Ce message est un long message pour le test du DMA1.\r\n" \
+					"Nous utilisons le DMA1 sur le périphérique USART2 TX.\r\n" \
+					"L'objectif est de faire un code simple qui explicite\r\n" \
+					"le fonctionement du DMA1 pour un novice comme moi.\r\n";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -95,6 +101,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_TIM16_Init();
   MX_ADC1_Init();
@@ -104,6 +111,9 @@ int main(void)
 
   // Start timer with interrupt
   //HAL_TIM_Base_Start_IT(&htim16);
+
+  HAL_DMA_RegisterCallback(&hdma_usart2_tx, HAL_DMA_XFER_CPLT_CB_ID, &DMATransferComplete);
+  LED2_OFF();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,25 +130,33 @@ int main(void)
 	  //Timer16_routine(&htim16);
 	  /* fin code test Adrien */
 
-	  // Test: Set GPIO pin high
-	  Debug_ADC1_ON();
+	  /* début code test ADC1 */
+//	  // Test: Set GPIO pin high
+//	  Debug_ADC1_ON();
+//
+//	  // Get ADV value
+//	  HAL_ADC_Start(&hadc1);
+//	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+//	  raw = HAL_ADC_GetValue(&hadc1);
+//
+//	  // Test: Set GPIO pin low
+//	  Debug_ADC1_OFF();
+//
+//	  // Convert to string and print
+//	  sprintf(msg, "%hu\r\n", raw); // retour chariot (\r) plus saut de ligne (\n)
+//	  //sprintf(msg, "%hu\r", raw); // écrase l'ancienne valeur
+//	  //sprintf(msg, "%hu\n", raw); // décale l'affichage indéfiniment
+//	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+//
+//	  // pretend we have something else to do for a while
+//	  HAL_Delay(1);
+	  /* fin code test ADC1 */
 
-	  // Get ADV value
-	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	  raw = HAL_ADC_GetValue(&hadc1);
-
-	  // Test: Set GPIO pin low
-	  Debug_ADC1_OFF();
-
-	  // Convert to string and print
-	  sprintf(msg, "%hu\r\n", raw); // retour chariot (\r) plus saut de ligne (\n)
-	  //sprintf(msg, "%hu\r", raw); // écrase l'ancienne valeur
-	  //sprintf(msg, "%hu\n", raw); // décale l'affichage indéfiniment
-	  HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-
-	  // pretend we have something else to do for a while
-	  HAL_Delay(1);
+	  /*début code test DMA1 */
+	  huart2.Instance->CR3 |= USART_CR3_DMAT;
+	  HAL_DMA_Start_IT(&hdma_usart2_tx, (uint32_t)msg_l,(uint32_t)&huart2.Instance->TDR, strlen(msg_l));
+	  HAL_Delay(1000);
+	  /* fin code test DMA1 */
 
     /* USER CODE END WHILE */
 
@@ -331,6 +349,22 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -393,6 +427,20 @@ static void MX_GPIO_Init(void)
 //		mode = 0;
 //	}
 //}
+void DMATransferComplete(DMA_HandleTypeDef *hdma)
+{
+	// LED2 on
+	//LED2_ON();
+
+	// disable UART DMA mode
+	huart2.Instance->CR3 &=~ USART_CR3_DMAT;
+
+	// LD2 off
+	//LED2_OFF();
+
+	// LD2 toggle
+	LED2_TOGGLE();
+}
 /* USER CODE END 4 */
 
 /**
