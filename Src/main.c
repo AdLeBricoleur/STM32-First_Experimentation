@@ -53,6 +53,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 //int mode = 0;
 //int toggle_flag =0;
 //uint16_t adc_buf[ADC_BUF_LEN];
+uint16_t test_pwm = 0;
+uint32_t test_pwm_2 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,8 +87,6 @@ int main(void)
 					"Nous utilisons le DMA1 sur le périphérique USART2 TX.\r\n" \
 					"L'objectif est de faire un code simple qui explicite\r\n" \
 					"le fonctionement du DMA1 pour un novice comme moi.\r\n";*/
-	uint16_t test_pwm = 0;
-	uint32_t test_pwm_2 = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -175,12 +175,8 @@ int main(void)
 
 	  /* début code PWM exemple 1 */
       // Start ADC Conversion
-       HAL_ADC_Start(&hadc1);
-      // Poll ADC1 Perihperal & TimeOut = 1mSec
-       HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-        //TIM16->CCR1 = test_pwm;
-       //Read The ADC Conversion Result & Map It To PWM DutyCycle
-       test_pwm = HAL_ADC_GetValue(&hadc1);
+       HAL_ADC_Start_IT(&hadc1);
+       // Update the PWM duty cycle with lastest ADC conversion result
        TIM16->CCR1 = (test_pwm<<4);
        TIM2->CCR1 = (uint32_t)(test_pwm<<4);
        HAL_Delay(1);
@@ -573,6 +569,13 @@ static void MX_GPIO_Init(void)
 //{
 //	LED2_OFF();
 //}
+
+ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+ {
+     // Read & Update The ADC Result
+	 test_pwm = HAL_ADC_GetValue(&hadc1);
+ }
+
 /* USER CODE END 4 */
 
 /**
