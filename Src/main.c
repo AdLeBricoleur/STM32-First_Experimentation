@@ -45,7 +45,6 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
 DAC_HandleTypeDef hdac1;
-DMA_HandleTypeDef hdma_dac_ch1;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim16;
@@ -58,16 +57,6 @@ DMA_HandleTypeDef hdma_usart2_tx;
 //int toggle_flag =0;
 //uint16_t adc_buf[ADC_BUF_LEN];
 //uint16_t test_pwm = 0;
-uint32_t Wave_LUT[NS] = {
-    2048, 2149, 2250, 2350, 2450, 2549, 2646, 2742, 2837, 2929, 3020, 3108, 3193, 3275, 3355,
-    3431, 3504, 3574, 3639, 3701, 3759, 3812, 3861, 3906, 3946, 3982, 4013, 4039, 4060, 4076,
-    4087, 4094, 4095, 4091, 4082, 4069, 4050, 4026, 3998, 3965, 3927, 3884, 3837, 3786, 3730,
-    3671, 3607, 3539, 3468, 3394, 3316, 3235, 3151, 3064, 2975, 2883, 2790, 2695, 2598, 2500,
-    2400, 2300, 2199, 2098, 1997, 1896, 1795, 1695, 1595, 1497, 1400, 1305, 1212, 1120, 1031,
-    944, 860, 779, 701, 627, 556, 488, 424, 365, 309, 258, 211, 168, 130, 97, 69, 45, 26, 13,
-	4, 0, 1, 8, 19, 35, 56, 82, 113, 149, 189, 234, 283, 336, 394, 456, 521, 591, 664, 740,
-	820, 902, 987, 1075, 1166, 1258, 1353, 1449, 1546, 1645, 1745, 1845, 1946, 2047
-};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,6 +90,8 @@ int main(void)
 					"Nous utilisons le DMA1 sur le périphérique USART2 TX.\r\n" \
 					"L'objectif est de faire un code simple qui explicite\r\n" \
 					"le fonctionement du DMA1 pour un novice comme moi.\r\n";*/
+	uint32_t DAC_OUT[4] = {0, 1241, 2482, 3723};
+	uint8_t i = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -121,11 +112,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_USART2_UART_Init();
-  MX_TIM16_Init();
-  MX_ADC1_Init();
-  MX_TIM2_Init();
+  //MX_DMA_Init();
+  //MX_USART2_UART_Init();
+  //MX_TIM16_Init();
+  //MX_ADC1_Init();
+  //MX_TIM2_Init();
   MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
   // Start timer without interrupt
@@ -145,8 +136,9 @@ int main(void)
   //TIM16->CCR1 = test_pwm;
   //TIM2->CCR1 = (uint32_t)test_pwm;
 
-  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)Wave_LUT, 128, DAC_ALIGN_12B_R);
-  HAL_TIM_Base_Start(&htim2);
+  //HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t*)Wave_LUT, 128, DAC_ALIGN_12B_R);
+  //HAL_TIM_Base_Start(&htim2);
+  HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -197,6 +189,13 @@ int main(void)
 	  //HAL_ADC_Start_DMA(&hadc1, (void*)(uint32_t)test_pwm, 1); // test 3 ne fonctionne pas danger!
       //HAL_Delay(1);
 	  /* fin code PWM exemple 3 */
+	  HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[i++]);
+      //DAC1->DHR12R1 = DAC_OUT[i++];
+      if(i == 4)
+      {
+          i = 0;
+      }
+      HAL_Delay(50);
 
     /* USER CODE END WHILE */
 
@@ -350,7 +349,7 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
@@ -519,9 +518,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
   /* DMA1_Channel7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
