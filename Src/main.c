@@ -54,7 +54,6 @@ DMA_HandleTypeDef hdma_usart2_tx;
 //int toggle_flag =0;
 //uint16_t adc_buf[ADC_BUF_LEN];
 uint16_t test_pwm = 0;
-uint32_t test_pwm_2 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -128,7 +127,7 @@ int main(void)
   // Calibrate the ADC On Power-Up For Better Accuracy
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
   TIM16->CCR1 = test_pwm;
-  TIM2->CCR1 = test_pwm_2;
+  TIM2->CCR1 = (uint32_t)test_pwm;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -173,14 +172,12 @@ int main(void)
 //	  HAL_Delay(1000);
 //	  /* fin code test DMA1 */
 
-	  /* début code PWM exemple 1 */
-      // Start ADC Conversion
-       HAL_ADC_Start_IT(&hadc1);
-       // Update the PWM duty cycle with lastest ADC conversion result
-       TIM16->CCR1 = (test_pwm<<4);
-       TIM2->CCR1 = (uint32_t)(test_pwm<<4);
-       HAL_Delay(1);
-	  /* fin code PWM exemple 1 */
+	  /* début code PWM exemple 3 */
+	  //HAL_ADC_Start_DMA(&hadc1, &test_pwm, 1); //test 1 attention warning PB cast
+	  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&test_pwm, 1);// test 2 ok aucune erreur
+	  //HAL_ADC_Start_DMA(&hadc1, (void*)(uint32_t)test_pwm, 1); // test 3 ne fonctionne pas danger!
+      HAL_Delay(1);
+	  /* fin code PWM exemple 3 */
 
     /* USER CODE END WHILE */
 
@@ -271,7 +268,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   hadc1.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -572,8 +569,11 @@ static void MX_GPIO_Init(void)
 
  void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
  {
-     // Read & Update The ADC Result
-	 test_pwm = HAL_ADC_GetValue(&hadc1);
+	// Conversion Complete & DMA Transfer Complete As Well
+	// So The AD_RES Is Now Updated & Let's Move IT To The PWM CCR1
+	// Update The PWM Duty Cycle With Latest ADC Conversion Result
+     TIM16->CCR1 = (test_pwm<<4);
+     TIM2->CCR1 = (uint32_t)(test_pwm<<4);
  }
 
 /* USER CODE END 4 */
